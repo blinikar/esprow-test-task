@@ -1,37 +1,39 @@
 import type { FC, ReactNode } from 'react'
-import { useMemo, memo, useState, useEffect } from 'react'
+import { useMemo, memo, useRef, useEffect } from 'react'
 
 import { Group, ActionIcon } from '@mantine/core';
 import { IconDownload, IconSearch, IconTrash } from '@tabler/icons-react';
-import { useWindowScroll, useViewportSize, useDebouncedState } from '@mantine/hooks';
+import { useWindowScroll, useViewportSize, useDebouncedValue } from '@mantine/hooks';
 
-interface VirutalizerProps<T> {
+interface VirutalizerProps<T, A extends Object> {
   rowHeight: number;
   components: T[];
-  renderItem: (component: T, index: number) => ReactNode;
-  rerenderSpecific: number;
+  renderItem: (component: T, index: number, additionalOptions: A) => ReactNode;
+  renderItemAdditionalOptions: A;
+  changedElements: (number|undefined)[];
 }
 
 const RenderedComponentsCoefficient = 2;
 
-export const VirtualizerRaw = <T extends object>(
+export const VirtualizerRaw = <T extends object, A extends object>(
   { 
     rowHeight, 
     components, 
     renderItem,
-    rerenderSpecific,
-  }: VirutalizerProps<T>
+    changedElements,
+    renderItemAdditionalOptions,
+  }: VirutalizerProps<T, A>
 ) => {
   const totalHeight = rowHeight * components.length;
-  
+
+  const componentsIndexToVisibleComponentsIndexMap = useRef(new Map<number, number>());
+
   const { height: windowHeight } = useViewportSize();
-  const [scroll, scrollTo] = useWindowScroll();
+  const [rawScroll, scrollTo] = useWindowScroll();
 
-  const [visibleComponents, setVisibleComponents] = useState<ReactNode[]>([]);
+  const [scroll] = useDebouncedValue(rawScroll, 50);
 
-  // Add debounce
   // Add render specific
-  // Add editing
 
   const yAxisScroll = scroll.y;
 
@@ -45,27 +47,35 @@ export const VirtualizerRaw = <T extends object>(
   const firstVisibleComponent = (distanceToTop / rowHeight);
   const lastVisibleComponent = ((distanceToTop + renderedScreenSize) / rowHeight);
 
-  useEffect(() => {
+  const visibleComponents: ReactNode[] = useMemo(() => {
     let newVisibleComponents: ReactNode[] = [];
+
+    componentsIndexToVisibleComponentsIndexMap.current.clear();
 
     for (let i = Math.floor(firstVisibleComponent); i <= Math.ceil(lastVisibleComponent); i++) {
       if (components[i]) {
-        newVisibleComponents.push(renderItem(components[i], i))
+        console.log('test');
+        newVisibleComponents.push(renderItem(components[i], i, renderItemAdditionalOptions))
+        componentsIndexToVisibleComponentsIndexMap.current.set(newVisibleComponents.length - 1, i)
       }
     }
 
-    setVisibleComponents(newVisibleComponents);
+    return newVisibleComponents;
   }, [
-    firstVisibleComponent, 
+    firstVisibleComponent,
     lastVisibleComponent,
     components,
-    renderItem,
-    setVisibleComponents
+    renderItem
   ]);
 
-  // useEffect(() => {
-  //   let newVisibleComponents = [...visibleComponents];
-  // }, [rerenderSpecific]);
+  changedElements.forEach((changedElement) => {
+    if (changedElement !== undefined) {
+      const changedElementVisibleComponentIndex = componentsIndexToVisibleComponentsIndexMap.current.get(changedElement);
+      if (changedElementVisibleComponentIndex !== undefined) {
+        visibleComponents[changedElementVisibleComponentIndex] = renderItem(components[changedElement], changedElement, renderItemAdditionalOptions);
+      }
+    }
+  })
 
   return (
     <div style={{paddingTop, paddingBottom: paddingBottom + 12}}>
@@ -74,4 +84,8 @@ export const VirtualizerRaw = <T extends object>(
   )
 }
 
-export const Virtualizer = memo(VirtualizerRaw)
+type VirtualizerComponent = <T extends object, A extends object>(
+  props: VirutalizerProps<T, A>
+) => ReactNode;
+
+export const Virtualizer = memo(VirtualizerRaw) as unknown as VirtualizerComponent;

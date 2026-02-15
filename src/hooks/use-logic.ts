@@ -12,6 +12,7 @@ export const useLogic = () => {
     isParsed,
     parseDataFromStringContent,
     clear,
+    changeValue,
   } = useJsonStore(useShallow(({ parsedData, ...state }) => state));
 
   const {
@@ -41,7 +42,7 @@ export const useLogic = () => {
     return () => {
       readerRef.current.onload = null;
     }
-  }, [])
+  }, [parseDataFromStringContent, readerRef.current])
 
   const handleAccept = (file: FileWithPath[]) => {
     readerRef.current.readAsText(file[0])
@@ -71,6 +72,7 @@ export const useLogic = () => {
     editor: {
       parsedData,
       foundIndex,
+      changeValue,
     }
   } as const
 }

@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 
 export interface JsonStore {
-  parsedData: Object[];
+  parsedData: Record<string, any>[];
   isParsed: boolean;
   parseDataFromStringContent: (content: string) => void;
+  changeValue: <T>(index: number, key: string, value: T) => void;
   clear: () => void,
 }
 
@@ -55,6 +56,18 @@ export const useJsonStore = create<JsonStore>((set) => ({
     return { 
       parsedData: JSON.parse(content),
       isParsed: true,
+    };
+  }),
+  changeValue: (index, key, value) => set((state) => {
+    const newParsedData = [ ...state.parsedData ]
+    
+    const foundItem = newParsedData[index]; 
+    foundItem[key] = value;
+    
+    console.log('testChange')
+
+    return { 
+      parsedData: newParsedData,
     };
   }),
   clear: () => set({ parsedData: [], isParsed: false }),
