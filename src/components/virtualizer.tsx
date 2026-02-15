@@ -43,14 +43,17 @@ export const VirtualizerRaw = <T extends object, A extends object>(
   const firstVisibleComponent = (distanceToTop / rowHeight);
   const lastVisibleComponent = ((distanceToTop + renderedScreenSize) / rowHeight);
 
+  let haveElementsChangedOnThisRender = false;
+
   const visibleComponents: ReactNode[] = useMemo(() => {
     let newVisibleComponents: ReactNode[] = [];
+
+    haveElementsChangedOnThisRender = true;
 
     componentsIndexToVisibleComponentsIndexMap.current.clear();
 
     for (let i = Math.floor(firstVisibleComponent); i <= Math.ceil(lastVisibleComponent); i++) {
       if (components[i]) {
-        console.log('test');
         newVisibleComponents.push(renderItem(components[i], i, renderItemAdditionalOptions))
         componentsIndexToVisibleComponentsIndexMap.current.set(newVisibleComponents.length - 1, i)
       }
@@ -64,14 +67,16 @@ export const VirtualizerRaw = <T extends object, A extends object>(
     renderItem
   ]);
 
-  changedElements.forEach((changedElement) => {
-    if (changedElement !== undefined) {
-      const changedElementVisibleComponentIndex = componentsIndexToVisibleComponentsIndexMap.current.get(changedElement);
-      if (changedElementVisibleComponentIndex !== undefined) {
-        visibleComponents[changedElementVisibleComponentIndex] = renderItem(components[changedElement], changedElement, renderItemAdditionalOptions);
+  if (!haveElementsChangedOnThisRender) {
+    changedElements.forEach((changedElement) => {
+      if (changedElement !== undefined && changedElement >= firstVisibleComponent && changedElement <= lastVisibleComponent) {
+        const changedElementVisibleComponentIndex = componentsIndexToVisibleComponentsIndexMap.current.get(changedElement);
+        if (changedElementVisibleComponentIndex !== undefined) {
+          visibleComponents[changedElementVisibleComponentIndex] = renderItem(components[changedElement], changedElement, renderItemAdditionalOptions);
+        }
       }
-    }
-  })
+    })
+  }
 
   return (
     <div style={{paddingTop, paddingBottom: paddingBottom + 12}}>
