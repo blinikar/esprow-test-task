@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useSearchStore } from "./use-store";
 
 export const useSearch = ({ parsedData }: { parsedData: Object[] }) => {
