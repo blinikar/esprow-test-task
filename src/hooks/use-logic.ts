@@ -6,6 +6,21 @@ import { useJsonStore } from "./use-store"
 import type { FileWithPath } from "@mantine/dropzone";
 import { useSearch } from "./use-search";
 
+const downloadJson = (data: any, filename = "data.json") => {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+}
+
 export const useLogic = () => {
   const parsedData = useJsonStore(useShallow((state) => state.parsedData));
   const {
@@ -48,11 +63,14 @@ export const useLogic = () => {
     readerRef.current.readAsText(file[0])
   }
 
+  const handleDownload = () => {
+    downloadJson(parsedData);
+  };
+
   return { 
     root: {
       shouldSearchBeOpened: searchOpened,
       shouldShowForm: !isParsed,
-      
     },
     dropZone: {
       onAccept: handleAccept,
@@ -67,7 +85,7 @@ export const useLogic = () => {
       shouldSearchBeOpened: searchOpened,
       onClear: clear,
       onOpenSearch: handleOpenSearch,
-      onDownload: () => {},
+      onDownload: handleDownload,
     },
     editor: {
       parsedData,

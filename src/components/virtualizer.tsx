@@ -1,8 +1,6 @@
-import type { FC, ReactNode } from 'react'
-import { useMemo, memo, useRef, useEffect } from 'react'
+import type { ReactNode } from 'react'
+import { useMemo, memo, useRef } from 'react'
 
-import { Group, ActionIcon } from '@mantine/core';
-import { IconDownload, IconSearch, IconTrash } from '@tabler/icons-react';
 import { useWindowScroll, useViewportSize, useDebouncedValue } from '@mantine/hooks';
 
 interface VirutalizerProps<T, A extends Object> {
@@ -29,11 +27,9 @@ export const VirtualizerRaw = <T extends object, A extends object>(
   const componentsIndexToVisibleComponentsIndexMap = useRef(new Map<number, number>());
 
   const { height: windowHeight } = useViewportSize();
-  const [rawScroll, scrollTo] = useWindowScroll();
+  const [rawScroll] = useWindowScroll();
 
   const [scroll] = useDebouncedValue(rawScroll, 50);
-
-  // Add render specific
 
   const yAxisScroll = scroll.y;
 

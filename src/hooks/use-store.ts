@@ -64,8 +64,6 @@ export const useJsonStore = create<JsonStore>((set) => ({
     const foundItem = newParsedData[index]; 
     foundItem[key] = value;
     
-    console.log('testChange')
-
     return { 
       parsedData: newParsedData,
     };
