@@ -56,13 +56,15 @@ export const useSearch = ({ parsedData }: { parsedData: Object[] }) => {
         continue;
       }
 
-      const keys = Object.keys(item);
+      const keys = Object.keys(item) as (keyof typeof item)[];
 
-      if (keys.some((key) => key.includes(searchValue))) {
+      if (keys.some((key) => (
+        key.includes(searchValue)) ||
+        (item[key].toString()).includes(searchValue)
+      )) {
         newFoundIndex = i;
         break;
       }
-      
     }
 
     if (newFoundIndex === undefined) {
