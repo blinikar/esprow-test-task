@@ -1,7 +1,7 @@
 import type { FC } from 'react'
 import { useCallback, useEffect, useState } from 'react'
 
-import { useMantineTheme, Accordion, Group, Input, NativeSelect, Checkbox, Text } from '@mantine/core';
+import { Accordion, Group, Input, NativeSelect, Checkbox, Text } from '@mantine/core';
 import { usePrevious } from '@mantine/hooks';
 
 import { Virtualizer } from './virtualizer';
@@ -54,8 +54,6 @@ const FieldForType = <T,>({
 }
 
 export const Editor: FC<EditorProps> = ({ parsedData, foundIndex, changeValue }) => {
-  const theme = useMantineTheme();
-
   const [changedElement, setChangedElement] = useState<number | undefined>();
   const previousFoundIndex = usePrevious(foundIndex);
 

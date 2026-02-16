@@ -1,4 +1,4 @@
-import { useMantineTheme, AppShell } from '@mantine/core';
+import { AppShell } from '@mantine/core';
 
 import { DropZone } from './components/drop-zone';
 import { Header } from './components/header';
@@ -20,8 +20,6 @@ function App() {
       shouldSearchBeOpened,
     } 
   } = useLogic();
-
-  const theme = useMantineTheme();
 
   return (
     <div>
